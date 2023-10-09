@@ -357,7 +357,7 @@ This is greet.html
    Build a Flask application that connects to a SQLite database and displays a list of items retrieved from the database on a route `/items`. You should have at least two routes - one for displaying the list and one for adding new items to the database.
 
    ```python
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
 
 app = Flask(__name__)
@@ -365,32 +365,42 @@ app = Flask(__name__)
 @app.route('/')
 def hello():
     create_table()
-    
+    return "Table created!"
 
 @app.route('/items')
 def display():
     data = show_data()
     return render_template('show.html', data=data)
 
-
 def create_table():
     conn = sqlite3.connect('items.db')
     cursor = conn.cursor()
 
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS items(
-                   id INTEGER,
-                   name TEXT
-        )
+    CREATE TABLE IF NOT EXISTS items (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT
+    )
     """)
     conn.commit()
     conn.close()
 
-@app.route('/insert', methods=['POST'])
+@app.route('/insert', methods=['GET','POST'])
 def insert():
-    id = request.form['id']
-    name = request.form['name']
-    return "Data Added!"
+    if request.method == 'POST':
+        id = request.form['id']
+        name = request.form['name']
+        insert_data(id, name)
+        # return render_template('show.html')
+    return render_template('add.html')
+
+def insert_data(id, name):
+    conn = sqlite3.connect('items.db')
+    cursor = conn.cursor()
+
+    cursor.execute("INSERT INTO items (id, name) VALUES (?,?)", (id, name,))
+    conn.commit()
+    conn.close()
 
 def show_data():
     conn = sqlite3.connect('items.db')
@@ -405,7 +415,8 @@ def show_data():
 
 if __name__ == '__main__':
     app.run(debug=True)
-```
+
+   ```
 
 5. **Authentication**:
 
