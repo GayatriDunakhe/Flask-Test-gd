@@ -356,6 +356,57 @@ This is greet.html
 
    Build a Flask application that connects to a SQLite database and displays a list of items retrieved from the database on a route `/items`. You should have at least two routes - one for displaying the list and one for adding new items to the database.
 
-4. **Authentication**:
+   ```python
+from flask import Flask, render_template
+import sqlite3
+
+app = Flask(__name__)
+
+@app.route('/')
+def hello():
+    create_table()
+    
+
+@app.route('/items')
+def display():
+    data = show_data()
+    return render_template('show.html', data=data)
+
+
+def create_table():
+    conn = sqlite3.connect('items.db')
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS items(
+                   id INTEGER,
+                   name TEXT
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+@app.route('/insert', methods=['POST'])
+def insert():
+    id = request.form['id']
+    name = request.form['name']
+    return "Data Added!"
+
+def show_data():
+    conn = sqlite3.connect('items.db')
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM items")
+
+    data = cursor.fetchall()
+
+    conn.close()
+    return data  
+
+if __name__ == '__main__':
+    app.run(debug=True)
+```
+
+5. **Authentication**:
 
    Develop a simple authentication system using Flask. Create two routes: `/login` and `/dashboard`. Users should be able to log in with a username and password on the `/login` route. After successful login, they should be redirected to the `/dashboard` route, which should display a welcome message with the user's name.
